@@ -101,6 +101,39 @@ If the green squares do not appear immediately, check these things:
 - The repository should not be a fork unless the commits were merged into the parent repository.
 - GitHub can take some time to update the contribution graph.
 
+## Reset the Repository
+
+Reset commands rewrite Git history. Use them only if you are okay with replacing the current `main` branch on GitHub.
+
+If you created a backup branch before generating commits, you can reset back to it:
+
+```powershell
+git reset --hard backup-before-email-fix
+git push --force-with-lease origin main
+```
+
+If you want to create a fresh clean branch with only one empty reset commit:
+
+```powershell
+git checkout --orphan fresh-main
+git rm -rf .
+git commit --allow-empty -m "Reset repository"
+git branch -D main
+git branch -m main
+git push --force-with-lease origin main
+```
+
+If you want to remove the generated green commits but keep the project files, create a fresh branch, add the files again, then force-push it:
+
+```powershell
+git checkout --orphan fresh-main
+git add README.md github.py
+git commit -m "Reset project files"
+git branch -D main
+git branch -m main
+git push --force-with-lease origin main
+```
+
 ## Notes
 
 This script creates empty commits only. It is not meant to fake real work or mislead people in professional settings.
