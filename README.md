@@ -56,10 +56,24 @@ You can customize it:
 py github.py --days 200 --commits 3
 ```
 
+Create a more natural-looking random pattern:
+
+```powershell
+py github.py --days 365 --random --min-commits 2 --max-commits 7
+```
+
+This creates a different number of commits on each day. For example, one day may get `3` commits, another may get `6`, another may get `2`, and so on.
+
 Skip weekends:
 
 ```powershell
 py github.py --days 365 --commits 5 --skip-weekends
+```
+
+Random commits while skipping weekends:
+
+```powershell
+py github.py --days 365 --random --min-commits 2 --max-commits 7 --skip-weekends
 ```
 
 ## Push to GitHub

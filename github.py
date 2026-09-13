@@ -1,5 +1,6 @@
 import argparse
 import os
+import random
 import subprocess
 from datetime import datetime, timedelta
 
@@ -49,24 +50,33 @@ def make_commit(commit_date, index):
     )
 
 
-def plant_green_field(days_back, commits_per_day, skip_weekends):
+def get_daily_commit_count(args):
+    if not args.random:
+        return args.commits
+
+    return random.randint(args.min_commits, args.max_commits)
+
+
+def plant_green_field(args):
     ensure_git_repo()
 
-    start_date = datetime.now() - timedelta(days=days_back)
+    start_date = datetime.now() - timedelta(days=args.days)
     total_commits = 0
 
-    for day in range(days_back + 1):
+    for day in range(args.days + 1):
         current_date = start_date + timedelta(days=day)
 
-        if skip_weekends and current_date.weekday() >= 5:
+        if args.skip_weekends and current_date.weekday() >= 5:
             continue
 
-        for commit_number in range(1, commits_per_day + 1):
+        daily_commits = get_daily_commit_count(args)
+
+        for commit_number in range(1, daily_commits + 1):
             make_commit(current_date, commit_number)
             total_commits += 1
 
         print(
-            f"{GREEN}Planted {commits_per_day} commits for "
+            f"{GREEN}Planted {daily_commits} commits for "
             f"{current_date:%Y-%m-%d}{RESET}"
         )
 
@@ -86,18 +96,43 @@ def parse_args():
         help="Empty commits to create per day.",
     )
     parser.add_argument(
+        "--random",
+        action="store_true",
+        help="Create a random number of commits each day.",
+    )
+    parser.add_argument(
+        "--min-commits",
+        type=int,
+        default=2,
+        help="Minimum commits per day when using --random.",
+    )
+    parser.add_argument(
+        "--max-commits",
+        type=int,
+        default=7,
+        help="Maximum commits per day when using --random.",
+    )
+    parser.add_argument(
         "--skip-weekends",
         action="store_true",
         help="Skip Saturdays and Sundays.",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.min_commits < 0 or args.max_commits < 0:
+        parser.error("--min-commits and --max-commits cannot be negative.")
+
+    if args.min_commits > args.max_commits:
+        parser.error("--min-commits cannot be greater than --max-commits.")
+
+    return args
 
 
 if __name__ == "__main__":
     args = parse_args()
 
     try:
-        plant_green_field(args.days, args.commits, args.skip_weekends)
+        plant_green_field(args)
     except subprocess.CalledProcessError as error:
         print(f"{RED}Git command failed: {error}{RESET}")
         print(
