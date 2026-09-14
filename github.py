@@ -17,7 +17,6 @@ GREEN = "\033[92m"
 YELLOW = "\033[93m"
 RED = "\033[91m"
 CYAN = "\033[96m"
-MAGENTA = "\033[95m"
 BOLD = "\033[1m"
 RESET = "\033[0m"
 
@@ -40,7 +39,7 @@ def is_git_repo():
 
 def ensure_git_repo():
     if not is_git_repo():
-        print(f"{YELLOW}No git repo found. Initializing one here...{RESET}")
+        print(f"{YELLOW}No git repo found. Initializing git repository...{RESET}")
         run(["git", "init"])
 
 
@@ -52,57 +51,18 @@ def get_git_config(key):
         return ""
 
 
-def prompt_user_credentials(args):
-    print(f"\n{CYAN}{BOLD}==========================================================={RESET}")
-    print(f"{GREEN}{BOLD}  GITHUB GREEN FIELD CONTRIBUTION BOOSTER (v2.0){RESET}")
-    print(f"{CYAN}{BOLD}==========================================================={RESET}\n")
-
+def get_user_credentials(args):
     detected_name = get_git_config("user.name") or "xbtye"
     detected_email = get_git_config("user.email") or "vs1120204@gmail.com"
 
-    username = args.username.strip() if args.username else ""
-    email = args.email.strip() if args.email else ""
+    username = args.username.strip() if args.username else detected_name
+    email = args.email.strip() if args.email else detected_email
 
-    print(f"{YELLOW}{BOLD}[Step 1/2] Target GitHub Account Details:{RESET}")
+    print(f"\n{CYAN}{BOLD}==========================================================={RESET}")
+    print(f"{GREEN}{BOLD}  GITHUB GREEN FIELD CONTRIBUTION BOOSTER (AUTOMATED){RESET}")
+    print(f"{CYAN}{BOLD}==========================================================={RESET}\n")
 
-    # 1. Ask for Username FIRST
-    if not username:
-        prompt_text = f"  {CYAN}> Enter target GitHub Username [default: {detected_name}]: {RESET}"
-        try:
-            input_val = input(prompt_text).strip()
-            username = input_val if input_val else detected_name
-        except (KeyboardInterrupt, EOFError):
-            print(f"\n{RED}Aborted.{RESET}")
-            sys.exit(1)
-
-    # Default GitHub no-reply email for target username
-    default_noreply_email = f"{username}@users.noreply.github.com"
-    suggested_email = detected_email if username == detected_name else default_noreply_email
-
-    # 2. Ask for Email
-    if not email:
-        print(f"\n  {YELLOW}[!] IMPORTANT: GitHub matches commits strictly by EMAIL.{RESET}")
-        print(f"      To credit contributions to '{username}', use an email linked to their GitHub account.")
-        print(f"      Default suggested email: {BOLD}{suggested_email}{RESET}\n")
-
-        while not email:
-            try:
-                email_input = input(
-                    f"  {CYAN}> Enter GitHub Email for '{username}' [default: {suggested_email}]: {RESET}"
-                ).strip()
-            except (KeyboardInterrupt, EOFError):
-                print(f"\n{RED}Aborted.{RESET}")
-                sys.exit(1)
-
-            if not email_input:
-                email = suggested_email
-            elif "@" not in email_input:
-                print(f"     {RED}Please enter a valid email address (e.g. user@gmail.com).{RESET}")
-            else:
-                email = email_input
-
-    # Immediately display profile confirmation banner
-    print(f"\n{GREEN}-----------------------------------------------------------{RESET}")
+    print(f"{GREEN}-----------------------------------------------------------{RESET}")
     print(f"{BOLD}[+] TARGET GITHUB PROFILE CONFIRMED:{RESET}")
     print(f"    {CYAN}GitHub Username:{RESET} {BOLD}{username}{RESET}")
     print(f"    {CYAN}Commit Email:   {RESET} {BOLD}{email}{RESET}")
@@ -111,75 +71,6 @@ def prompt_user_credentials(args):
     print(f"{GREEN}-----------------------------------------------------------{RESET}\n")
 
     return username, email
-
-
-def prompt_configuration(args):
-    # If user provided explicit flags via CLI, use them directly
-    if args.cli_provided_options:
-        return args
-
-    print(f"{YELLOW}{BOLD}[Step 2/2] Configure Commit Generation:{RESET}")
-
-    # Days prompt
-    if not args.year and not args.start_date:
-        while True:
-            try:
-                days_input = input(f"  {CYAN}> Days to backdate? [default: {args.days}]: {RESET}").strip()
-            except (KeyboardInterrupt, EOFError):
-                print(f"\n{RED}Aborted.{RESET}")
-                sys.exit(1)
-
-            if not days_input:
-                break
-            try:
-                val = int(days_input)
-                if val > 0:
-                    args.days = val
-                    break
-                print(f"     {RED}Days must be greater than 0.{RESET}")
-            except ValueError:
-                print(f"     {RED}Please enter a valid integer number.{RESET}")
-
-    # Commits per day prompt
-    while True:
-        try:
-            commits_input = input(f"  {CYAN}> Commits per day? [default: {args.commits}]: {RESET}").strip()
-        except (KeyboardInterrupt, EOFError):
-            print(f"\n{RED}Aborted.{RESET}")
-            sys.exit(1)
-
-        if not commits_input:
-            break
-        try:
-            val = int(commits_input)
-            if val > 0:
-                args.commits = val
-                break
-            print(f"     {RED}Commits count must be greater than 0.{RESET}")
-        except ValueError:
-            print(f"     {RED}Please enter a valid integer number.{RESET}")
-
-    # Random commits prompt
-    try:
-        random_input = input(f"  {CYAN}> Use random commits per day for realistic graph? (Y/n) [default: Y]: {RESET}").strip().lower()
-        if random_input in ("", "y", "yes"):
-            args.random = True
-        elif random_input in ("n", "no"):
-            args.random = False
-    except (KeyboardInterrupt, EOFError):
-        print(f"\n{RED}Aborted.{RESET}")
-        sys.exit(1)
-
-    # Skip weekends prompt
-    try:
-        skip_input = input(f"  {CYAN}> Skip weekends? (y/N) [default: N]: {RESET}").strip().lower()
-        if skip_input in ("y", "yes"):
-            args.skip_weekends = True
-    except (KeyboardInterrupt, EOFError):
-        print(f"\n{RED}Aborted.{RESET}")
-        sys.exit(1)
-
-    return args
 
 
 def make_commit(commit_datetime, index, username, email):
@@ -234,17 +125,15 @@ def calculate_date_range(args):
 
 
 def plant_green_field(args):
-    username, email = prompt_user_credentials(args)
-    args = prompt_configuration(args)
+    username, email = get_user_credentials(args)
     ensure_git_repo()
 
     start_date, end_date = calculate_date_range(args)
     total_days = (end_date - start_date).days + 1
 
-    print(f"\n{CYAN}{BOLD}==========================================================={RESET}")
-    print(f"{GREEN}{BOLD}[*] Generating commits for profile '{username}' ({email})...{RESET}")
+    print(f"{CYAN}{BOLD}[*] Planting contribution commits...{RESET}")
     print(f"    Date Range: {start_date:%Y-%m-%d} to {end_date:%Y-%m-%d} ({total_days} days)")
-    print(f"{CYAN}{BOLD}==========================================================={RESET}\n")
+    print(f"    Random Mode: {'Enabled (' + str(args.min_commits) + '-' + str(args.max_commits) + ' commits/day)' if args.random else 'Fixed (' + str(args.commits) + ' commits/day)'}\n")
 
     total_commits = 0
 
@@ -260,7 +149,6 @@ def plant_green_field(args):
         daily_commits = get_daily_commit_count(args)
 
         for commit_number in range(1, daily_commits + 1):
-            # Generate realistic timestamp spread between 09:00 and 21:59
             random_hour = random.randint(9, 21)
             random_minute = random.randint(0, 59)
             random_second = random.randint(0, 59)
@@ -296,16 +184,16 @@ def parse_args():
         "--name",
         type=str,
         default="",
-        help="GitHub username for commit author attribution.",
+        help="GitHub username for commit author attribution (default: xbtye).",
     )
     parser.add_argument(
         "--email",
         "--gmail",
         type=str,
         default="",
-        help="Gmail/Email associated with your GitHub account.",
+        help="Gmail/Email associated with your GitHub account (default: vs1120204@gmail.com).",
     )
-    parser.add_argument("--days", type=int, default=365, help="Days to fill.")
+    parser.add_argument("--days", type=int, default=365, help="Days to fill (default: 365).")
     parser.add_argument("--year", type=int, default=None, help="Fill commits for a specific calendar year (e.g. 2025).")
     parser.add_argument("--start-date", type=str, default=None, help="Start date (YYYY-MM-DD).")
     parser.add_argument("--end-date", type=str, default=None, help="End date (YYYY-MM-DD).")
@@ -313,24 +201,27 @@ def parse_args():
         "--commits",
         type=int,
         default=4,
-        help="Empty commits to create per day.",
+        help="Empty commits to create per day (when random mode is disabled).",
     )
     parser.add_argument(
-        "--random",
-        action="store_true",
-        help="Create a random number of commits each day.",
+        "--no-random",
+        dest="random",
+        action="store_false",
+        help="Disable random daily commits count and use fixed --commits count.",
     )
+    parser.set_defaults(random=True)
+
     parser.add_argument(
         "--min-commits",
         type=int,
         default=1,
-        help="Minimum commits per day when using --random.",
+        help="Minimum commits per day when using random mode (default: 1).",
     )
     parser.add_argument(
         "--max-commits",
         type=int,
         default=6,
-        help="Maximum commits per day when using --random.",
+        help="Maximum commits per day when using random mode (default: 6).",
     )
     parser.add_argument(
         "--skip-weekends",
@@ -338,18 +229,7 @@ def parse_args():
         help="Skip Saturdays and Sundays.",
     )
 
-    sys_argv = sys.argv[1:]
     args = parser.parse_args()
-
-    args.cli_provided_options = any(
-        arg.startswith("--days")
-        or arg.startswith("--year")
-        or arg.startswith("--start-date")
-        or arg.startswith("--commits")
-        or arg == "--random"
-        or arg == "--skip-weekends"
-        for arg in sys_argv
-    )
 
     if args.min_commits < 0 or args.max_commits < 0:
         parser.error("--min-commits and --max-commits cannot be negative.")
