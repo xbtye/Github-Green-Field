@@ -8,8 +8,8 @@ This project is built so anyone can easily use it or run it for another user's G
 
 GitHub **ONLY** awards green squares to a GitHub profile based on the **EMAIL ADDRESS** attached to the commits, not just the display username!
 
-- If you enter `ayanmukherjee-collab` as Username, but enter **your own email**, GitHub will credit the commits to **your account**!
-- To credit commits to `ayanmukherjee-collab`, you must use an email address linked to `ayanmukherjee-collab`'s GitHub account.
+- If you enter `xbtye` as Username, but enter **your own email**, GitHub will credit the commits to **your account**!
+- To credit commits to `xbtye`, you must use an email address linked to `xbtye`'s GitHub account (e.g., `vs1120204@gmail.com` or `xbtye@users.noreply.github.com`).
 - The script automatically offers the default GitHub no-reply email: `username@users.noreply.github.com` (simply press Enter when prompted).
 
 ## Features
@@ -29,8 +29,8 @@ py github.py
 
 Terminal workflow:
 
-1. **Enter target GitHub Username**: `ayanmukherjee-collab`
-2. **Enter GitHub Email**: Press **Enter** to use `ayanmukherjee-collab@users.noreply.github.com` (or type their personal Gmail).
+1. **Enter target GitHub Username**: `xbtye`
+2. **Enter GitHub Email**: `vs1120204@gmail.com` (or press **Enter** to use `xbtye@users.noreply.github.com`).
 3. **Configure Days & Commits**: Set days to backdate [default: 365] and commits per day [default: 4].
 
 ## Command Line Usage
@@ -38,7 +38,7 @@ Terminal workflow:
 Pass flags directly:
 
 ```powershell
-py github.py --username "ayanmukherjee-collab" --email "ayanmukherjee-collab@users.noreply.github.com"
+py github.py --username "xbtye" --email "vs1120204@gmail.com"
 ```
 
 ### Advanced Customization
@@ -65,6 +65,6 @@ After generating commits, push them to GitHub:
 
 ```powershell
 git branch -M main
-git remote add origin https://github.com/ayanmukherjee-collab/<repo-name>.git
+git remote add origin https://github.com/xbtye/Github-Green-Field.git
 git push -u origin main
 ```
