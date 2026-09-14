@@ -1,68 +1,75 @@
 # GitHub Green Field
 
-A small Python script that creates backdated empty Git commits to fill a GitHub contribution graph with green squares.
+A small Python script that creates backdated empty Git commits to fill any user's GitHub contribution graph with green squares.
 
-This project is meant for fun, demos, and harmless pranks with friends. It does not change any real project files because it uses empty commits.
+This project is built so anyone can easily use it or run it for their own GitHub profile without configuring system-wide Git credentials.
+
+## Features
+
+- **Interactive User Prompt**: Prompts directly for your GitHub Email/Gmail and GitHub Username when run.
+- **Custom Attribution**: Sets author and committer details on every commit so contributions register on your GitHub profile graph.
+- **Flexible Options**: Custom days range, daily commit count, random commit patterns, and weekend skipping.
+- **CLI Support**: Optional command-line flags (`--email` and `--username`) for automated scripts.
 
 ## How It Works
 
-GitHub shows contributions based on commits that are:
+GitHub attributes contributions based on commits that are:
 
-- made with an email address connected to your GitHub account
-- pushed to the repository's default branch, usually `main`
-- inside the contribution graph date range
+- Made with an email address connected to your verified GitHub account.
+- Pushed to the repository's default branch (usually `main`).
+- Inside the contribution graph date range.
 
 This script creates empty commits for past dates by setting:
 
-- `GIT_AUTHOR_DATE`
-- `GIT_COMMITTER_DATE`
+- `GIT_AUTHOR_NAME` & `GIT_AUTHOR_EMAIL`
+- `GIT_COMMITTER_NAME` & `GIT_COMMITTER_EMAIL`
+- `GIT_AUTHOR_DATE` & `GIT_COMMITTER_DATE`
 - Git commit `--date`
 
-Because the dates are backdated, GitHub can place those commits on earlier days in your contribution graph after you push the repository.
+Because the author details are bound directly to each commit, anyone can enter their details when running the script to boost their profile graph.
 
 ## Requirements
 
-- Git installed
-- Python installed on your system
-- A GitHub repository
-- Your local Git email must match a verified email on your GitHub account
+- Git installed on your system
+- Python 3.x installed
+- A GitHub repository (or new repository) linked to your account
 
-Check your Git email:
+## Quick Start (Interactive)
 
-```powershell
-git config user.email
-```
-
-Set your Git email:
-
-```powershell
-git config user.name "Your Name"
-git config user.email "your-github-email@example.com"
-```
-
-## Usage
-
-Run the script from this repository:
+Simply run the script:
 
 ```powershell
 py github.py
 ```
 
-By default, it creates commits for the last `365` days with `4` commits per day.
+It will ask you interactively:
 
-You can customize it:
+1. **Enter your GitHub Email / Gmail** (e.g. `yourname@gmail.com`)
+2. **Enter your GitHub Username** (e.g. `your-github-username`)
+
+Then it generates backdated empty commits for your profile!
+
+## Command Line Usage
+
+You can also pass your username and email directly using CLI arguments:
+
+```powershell
+py github.py --email "yourname@gmail.com" --username "yourusername"
+```
+
+### Advanced Customization
+
+Change days and commit count:
 
 ```powershell
 py github.py --days 200 --commits 3
 ```
 
-Create a more natural-looking random pattern:
+Create a natural-looking random pattern:
 
 ```powershell
 py github.py --days 365 --random --min-commits 2 --max-commits 7
 ```
-
-This creates a different number of commits on each day. For example, one day may get `3` commits, another may get `6`, another may get `2`, and so on.
 
 Skip weekends:
 
@@ -76,7 +83,15 @@ Random commits while skipping weekends:
 py github.py --days 365 --random --min-commits 2 --max-commits 7 --skip-weekends
 ```
 
-## Push to GitHub
+Non-interactive CI / Script Mode:
+
+```powershell
+py github.py --email "yourname@gmail.com" --username "yourusername" --non-interactive
+```
+
+## Push Contributions to GitHub
+
+After running the script, push the commits to your GitHub repository:
 
 If this is a new repository:
 
@@ -86,54 +101,15 @@ git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
 git push -u origin main
 ```
 
-If the repository is already connected:
+If the repository is already connected to your remote:
 
 ```powershell
 git push
 ```
 
-## Why Contributions Might Not Show
+## Troubleshooting & Notes
 
-If the green squares do not appear immediately, check these things:
-
-- The commit email must be added and verified in your GitHub account.
-- The commits must be on the default branch of the repository.
-- The repository should not be a fork unless the commits were merged into the parent repository.
-- GitHub can take some time to update the contribution graph.
-
-## Reset the Repository
-
-Reset commands rewrite Git history. Use them only if you are okay with replacing the current `main` branch on GitHub.
-
-If you created a backup branch before generating commits, you can reset back to it:
-
-```powershell
-git reset --hard backup-before-email-fix
-git push --force-with-lease origin main
-```
-
-If you want to create a fresh clean branch with only one empty reset commit:
-
-```powershell
-git checkout --orphan fresh-main
-git rm -rf .
-git commit --allow-empty -m "Reset repository"
-git branch -D main
-git branch -m main
-git push --force-with-lease origin main
-```
-
-If you want to remove the generated green commits but keep the project files, create a fresh branch, add the files again, then force-push it:
-
-```powershell
-git checkout --orphan fresh-main
-git add README.md github.py
-git commit -m "Reset project files"
-git branch -D main
-git branch -m main
-git push --force-with-lease origin main
-```
-
-## Notes
-
-This script creates empty commits only. It is not meant to fake real work or mislead people in professional settings.
+- **Commit Email**: Make sure the email you enter is added and verified in your GitHub account settings (`Settings` -> `Emails`).
+- **Default Branch**: GitHub calculates contributions for commits on your repository's primary branch (`main`).
+- **Processing Time**: GitHub contribution graphs usually update within a few minutes after pushing.
+- **Empty Commits**: This script uses `--allow-empty` commits, so no project files are modified.
