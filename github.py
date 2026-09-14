@@ -48,25 +48,13 @@ def prompt_user_credentials(args):
     username = args.username.strip() if args.username else ""
     email = args.email.strip() if args.email else ""
 
-    if not email:
-        print(f"{YELLOW}{BOLD}[Step 1/2] Account Details:{RESET}")
-        while not email:
-            try:
-                email = input(f"  {CYAN}> Enter your GitHub Email / Gmail: {RESET}").strip()
-            except (KeyboardInterrupt, EOFError):
-                print(f"\n{RED}Aborted.{RESET}")
-                sys.exit(1)
+    print(f"{YELLOW}{BOLD}[Step 1/2] Target GitHub Account Details:{RESET}")
 
-            if not email:
-                print(f"     {RED}Email cannot be empty. Please try again.{RESET}")
-            elif "@" not in email:
-                print(f"     {RED}Please enter a valid email address (e.g. user@gmail.com).{RESET}")
-                email = ""
-
+    # 1. Ask for Username FIRST
     if not username:
         while not username:
             try:
-                username = input(f"  {CYAN}> Enter your GitHub Username: {RESET}").strip()
+                username = input(f"  {CYAN}> Enter target GitHub Username: {RESET}").strip()
             except (KeyboardInterrupt, EOFError):
                 print(f"\n{RED}Aborted.{RESET}")
                 sys.exit(1)
@@ -74,13 +62,36 @@ def prompt_user_credentials(args):
             if not username:
                 print(f"     {RED}Username cannot be empty. Please try again.{RESET}")
 
+    # Default GitHub no-reply email for the target username
+    default_noreply_email = f"{username}@users.noreply.github.com"
+
+    # 2. Ask for Email (with auto-suggestion of target user's GitHub email)
+    if not email:
+        print(f"\n  {YELLOW}[!] IMPORTANT: GitHub matches commits strictly by EMAIL.{RESET}")
+        print(f"      To give contributions to '{username}', use an email linked to their GitHub account.")
+        print(f"      Press Enter to use default GitHub email: {BOLD}{default_noreply_email}{RESET}\n")
+
+        while not email:
+            try:
+                email_input = input(f"  {CYAN}> Enter GitHub Email for '{username}' [default: {default_noreply_email}]: {RESET}").strip()
+            except (KeyboardInterrupt, EOFError):
+                print(f"\n{RED}Aborted.{RESET}")
+                sys.exit(1)
+
+            if not email_input:
+                email = default_noreply_email
+            elif "@" not in email_input:
+                print(f"     {RED}Please enter a valid email address (e.g. user@gmail.com).{RESET}")
+            else:
+                email = email_input
+
     # Immediately display profile confirmation banner on terminal!
     print(f"\n{GREEN}-----------------------------------------------------------{RESET}")
     print(f"{BOLD}[+] TARGET GITHUB PROFILE CONFIRMED:{RESET}")
     print(f"    {CYAN}GitHub Username:{RESET} {BOLD}{username}{RESET}")
-    print(f"    {CYAN}Gmail / Email:  {RESET} {BOLD}{email}{RESET}")
+    print(f"    {CYAN}Commit Email:   {RESET} {BOLD}{email}{RESET}")
     print(f"    {CYAN}GitHub Profile: {RESET} {BOLD}https://github.com/{username}{RESET}")
-    print(f"{GREEN}[*] All contributions will be credited to: https://github.com/{username}{RESET}")
+    print(f"{GREEN}[*] All generated commits will be authored by & credited to: {BOLD}{username}{RESET}")
     print(f"{GREEN}-----------------------------------------------------------{RESET}\n")
 
     return username, email
